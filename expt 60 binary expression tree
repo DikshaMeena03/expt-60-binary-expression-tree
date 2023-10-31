@@ -1,0 +1,87 @@
+#include <iostream>
+#include <string>
+#include <stack>
+using namespace std;
+
+struct TreeNode {
+    string val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(string x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+bool isOperator(string token) {
+    return token == "+" || token == "-" || token == "*" || token == "/";
+}
+
+TreeNode* buildExpressionTree(string postfixExpression) {
+    stack<TreeNode*> stk;
+
+    for (int i = 0; i < postfixExpression.length(); i++) {
+        string token = postfixExpression.substr(i, 1);
+
+        if (!isOperator(token)) {
+            TreeNode* node = new TreeNode(token);
+            stk.push(node);
+        } else {
+            TreeNode* rightOperand = stk.top();
+            stk.pop();
+            TreeNode* leftOperand = stk.top();
+            stk.pop();
+
+            TreeNode* operatorNode = new TreeNode(token);
+            operatorNode->left = leftOperand;
+            operatorNode->right = rightOperand;
+
+            stk.push(operatorNode);
+        }
+    }
+
+    return stk.top();
+}
+
+int evaluateExpressionTree(TreeNode* root) {
+    if (!root)
+        return 0;
+
+    if (!root->left && !root->right)
+        return stoi(root->val);
+
+    int leftValue = evaluateExpressionTree(root->left);
+    int rightValue = evaluateExpressionTree(root->right);
+
+    if (root->val == "+")
+        return leftValue + rightValue;
+    else if (root->val == "-")
+        return leftValue - rightValue;
+    else if (root->val == "*")
+        return leftValue * rightValue;
+    else if (root->val == "/")
+        return leftValue / rightValue;
+
+    return 0;  // Default case
+}
+
+void inorderTraversal(TreeNode* root) {
+    if (root) {
+        inorderTraversal(root->left);
+        cout << root->val << " ";
+        inorderTraversal(root->right);
+    }
+}
+
+int main() {
+    string postfixExpression = "34+2*";
+
+    TreeNode* root = buildExpressionTree(postfixExpression);
+
+    cout << "Inorder traversal of the expression tree: ";
+    inorderTraversal(root);
+    cout << endl;
+
+    int result = evaluateExpressionTree(root);
+
+    cout << "Result of the expression: " << result << endl;
+
+    return 0;
+}
